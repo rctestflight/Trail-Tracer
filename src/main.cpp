@@ -1,3 +1,5 @@
+//https://www.rctestflight.com/trailtracer
+
 #include <Arduino.h>
 #include <math.h>
 #include <PID_v1.h>
@@ -1548,15 +1550,3 @@ void applyDeviceConfig(const DeviceConfig& cfg)
   espPacketFifo_addCmdInt32(1 | 0x80000000, (int32_t)(rx_channel - 1));
   espPacketFifo_addCmdInt32(3 | 0x80000000, 0);  // Save channel value to STM32 NVM
 }
-
-
-/* To do list:
-make it work if user doesn't have aux channel connected to rx
-Button Long Press should calibrate both S1 and S2? 
-Have tyler fix the issue where the LED on RX is on all the time. Not only on wire signal loss
-Verify that signal center calibrtion works 
-Ask tyler: why does " // Set up PWM inputs (in progress)" say "in progress"?
-in the STM32 code, line 1435 says 	&& (v_psu > (v_batt - 0.5)), but in the ESP32 code it says (stmPacket.items.vbatt + 0.4)
-
-
-*/
