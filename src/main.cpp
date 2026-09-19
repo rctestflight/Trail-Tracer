@@ -1105,7 +1105,7 @@ uint16_t driveMode(){
         }else if(throttle_input_pwm < 1450 && throttle_input_pwm > 1150 && throttle_micros > PWM_OUT_2_DEFAULT){  // decelerate
           throttle_micros--;
         }else if(throttle_input_pwm > 800 && throttle_input_pwm < 1100){  // slow down quickly
-          throttle_micros = throttle_micros - 5;
+          throttle_micros = max(throttle_micros - 5, PWM_OUT_2_MIN);
         }
       }
 
