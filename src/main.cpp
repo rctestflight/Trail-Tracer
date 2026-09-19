@@ -665,7 +665,7 @@ void loop() {
         creep_throttle_init = true;
       }
 
-      if(btx_user_override_active){
+      if(btx_user_override_active || drive_mode_status == 0){
         creep_until_ms = 0;
         creep_returning = false;
         creep_was_active = false;
