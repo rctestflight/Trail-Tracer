@@ -101,6 +101,11 @@ int    CHARGE_MAX_SECONDS; // Maximum charge time in seconds. Vehicle will resum
 #define MAIN_LOOP_PERIOD 360000  // 1hr rollover
 #define SERIAL1_FLUSH_MAX_BYTES 64  // Limit post-read drain to avoid long blocking stalls
 #define SERIAL1_FLUSH_MAX_US 150  // Microsecond budget for post-read drain
+#define SERIAL1_OVERRUN_MAX_BYTES 2304  // Overrun drain: a full receive buffer and a packet over, so one cycle clears a backlog
+#define SERIAL1_OVERRUN_MAX_US 4000  // Microsecond budget for the overrun drain
+#define SERIAL1_DRAIN_BLOCK 256  // Bytes per read while draining: one driver call each rather than one
+                                 // per byte, and comfortably more than the 122 a cycle brings, so even
+                                 // a single read per cycle still shrinks the backlog
 
 // Button configuration
 #define BUTTON_DEBOUNCE_PERIODS 3  // 0.03s
@@ -209,6 +214,7 @@ int32_t bttn_6s_state = 0;  // state of a 6s press
 
 void receiveStmUart();  // ISR routine to set data ready flag
 void flushSerial1RxBounded();  // Drain limited stale UART bytes without blocking the loop
+void flushSerial1RxLimited(uint16_t max_bytes, uint32_t max_us);  // Drain stale UART bytes under a byte and time limit
 static uint16_t crc16_ibm(const uint8_t *data, size_t len);  // CRC-16/IBM: poly 0x8005, init 0xFFFF, no reflection
 void stm32_boot_handshake();  // IAP hello/boot handshake — call once after Serial1.begin()
 void writePwmMicros(uint8_t ch, uint32_t micros); // Write PWM output pulse width in microseconds
@@ -532,7 +538,12 @@ void loop() {
     // previous cycle.  Drain and skip this cycle; the next interrupt will bring a
     // fresh, complete packet that is guaranteed to be aligned.
     if(data_ready > 1 || Serial1.available() > (int)sizeof(stmPacket.uart_data)){
-      while(Serial1.available()) Serial1.read();  // drain stale bytes first
+      // Drain under a limit, not until the buffer happens to be empty: the sensor board
+      // keeps sending during the drain, so an unbounded drain only ends when reading gets
+      // ahead of a live stream, and holds the loop for as long as it does not.  What is
+      // left over is drained on the following cycles, which still take this path because
+      // the buffer still holds more than one packet, so a packet is never read misaligned.
+      flushSerial1RxLimited(SERIAL1_OVERRUN_MAX_BYTES, SERIAL1_OVERRUN_MAX_US);  // drain stale bytes first
       data_ready = 0;                             // then reset (ISR during drain → clean next cycle)
       uart_overrun_count++;
       // Fall through to the rest of loop() without touching stmPacket.
@@ -976,12 +987,34 @@ void IRAM_ATTR receiveStmUart(){
 }
 
 void flushSerial1RxBounded(){
+  flushSerial1RxLimited(SERIAL1_FLUSH_MAX_BYTES, SERIAL1_FLUSH_MAX_US);
+}
+
+void flushSerial1RxLimited(uint16_t max_bytes, uint32_t max_us){
   uint32_t start_us = micros();
   uint16_t flushed = 0;
-  while(Serial1.available() && (flushed < SERIAL1_FLUSH_MAX_BYTES)){
-    Serial1.read();
-    flushed++;
-    if((micros() - start_us) >= SERIAL1_FLUSH_MAX_US){
+  uint8_t sink[SERIAL1_DRAIN_BLOCK];
+  while(flushed < max_bytes){
+    // Read a block at a time.  Serial1.read() is one call into the UART driver
+    // for each byte, so a byte-at-a-time drain costs more per byte than the
+    // sensor board costs to send one, and a backlog then grows faster than it
+    // clears.  readBytes() pays that once for the whole block.
+    int waiting = Serial1.available();
+    if(waiting <= 0){
+      break;
+    }
+    // Never ask for more than is already buffered: readBytes() waits up to the
+    // setTimeout() of 10 ms for bytes that have not arrived yet.
+    uint16_t want = (uint16_t)((waiting > SERIAL1_DRAIN_BLOCK) ? SERIAL1_DRAIN_BLOCK : waiting);
+    if(want > (uint16_t)(max_bytes - flushed)){
+      want = max_bytes - flushed;
+    }
+    size_t got = Serial1.readBytes(sink, want);
+    if(got == 0){
+      break;  // nothing came back, so nothing will: do not spin on it
+    }
+    flushed += (uint16_t)got;
+    if((micros() - start_us) >= max_us){
       break;
     }
   }
