@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "builds": [
+    {
+      "manifest": "Trail_Tracer_Mower/v0.7.15/805d2b7ee81b/manifest.json",
+      "repo": "rctestflight/Trail_Tracer_Mower",
+      "branch": "v0.7.15",
+      "commit": "805d2b7ee81b7a4bf1c8296be946fd9e9a94bc6e",
+      "subject": "",
+      "chip": "esp32s2",
+      "name": "ESP32 rover firmware",
+      "version": "0.7.15",
+      "built_utc": "2026-11-04T23:50:30Z"
+    }
+  ]
+}

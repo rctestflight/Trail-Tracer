@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "builds": [
+    {
+      "manifest": "TrailTracer-Rx-STM32/v0.1.0-shipped/86bee8a47d79/stm32/manifest.json",
+      "repo": "rctestflight/TrailTracer-Rx-STM32",
+      "branch": "v0.1.0-shipped",
+      "commit": "86bee8a47d79682394ab34092128fd26f237b9ba",
+      "subject": "",
+      "chip": "stm32g070",
+      "name": "STM32 app",
+      "version": "0.1.0",
+      "built_utc": "2026-11-14T08:07:27Z"
+    },
+    {
+      "manifest": "Trail-Tracer/v1.0-factory/172f102edefa/esp32s2/manifest.json",
+      "repo": "rctestflight/Trail-Tracer",
+      "branch": "v1.0-factory",
+      "commit": "172f102edefa5454350fa76fffa3ff416d5b256e",
+      "subject": "",
+      "chip": "esp32s2",
+      "name": "ESP32 firmware (no version report)",
+      "version": "V1.0 (main 172f102)",
+      "built_utc": "2026-10-12T23:19:27Z"
+    }
+  ]
+}

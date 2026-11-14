@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "product": "trail-tracer-rx",
+  "chip": "stm32g070",
+  "boards": [
+    "RX_REVA"
+  ],
+  "name": "STM32 app",
+  "version": "0.1.0",
+  "source": {
+    "repo": "rctestflight/TrailTracer-Rx-STM32",
+    "branch": "v0.1.0-shipped",
+    "commit": "86bee8a47d79682394ab34092128fd26f237b9ba",
+    "subject": "",
+    "built_utc": "2026-11-14T08:07:27Z",
+    "builder": "local"
+  },
+  "stm32": {
+    "app_version": "0.1.0",
+    "link": "v1",
+    "boot_checker_min": "0.1.0",
+    "product_id": "0x46544352",
+    "update": {
+      "header": "app.commit_header",
+      "image": "app.bin.encrypted",
+      "chunk_size": 1040,
+      "chunks": 66
+    },
+    "needs_esp32": "0.5.26"
+  },
+  "files": [
+    {
+      "path": "app.commit_header",
+      "size": 52,
+      "sha256": "fc6c7a59649514065ef3bb9945ca5a129402179a3cab29e72d869d1619ebf72f"
+    },
+    {
+      "path": "app.bin.encrypted",
+      "size": 68640,
+      "sha256": "b197d43efad6bb0ffe971b3d6b7873fbf2f210644d8e6e10b7e9e0300292e876"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "product": "trail-tracer-rx",
+  "chip": "esp32s2",
+  "boards": [
+    "RX_REVA"
+  ],
+  "name": "ESP32 rover firmware",
+  "version": "0.7.15",
+  "source": {
+    "repo": "rctestflight/Trail_Tracer_Mower",
+    "branch": "v0.7.15",
+    "commit": "805d2b7ee81b7a4bf1c8296be946fd9e9a94bc6e",
+    "subject": "",
+    "built_utc": "2026-11-04T23:50:30Z",
+    "builder": "local"
+  },
+  "esp32": {
+    "partition_table": {
+      "name": "rover-4mb-1",
+      "crc32": "a993de6b",
+      "entries": [
+        {
+          "name": "nvs",
+          "type": 1,
+          "subtype": 2,
+          "offset": "0x9000",
+          "size": "0x5000"
+        },
+        {
+          "name": "otadata",
+          "type": 1,
+          "subtype": 0,
+          "offset": "0xe000",
+          "size": "0x2000"
+        },
+        {
+          "name": "app0",
+          "type": 0,
+          "subtype": 16,
+          "offset": "0x10000",
+          "size": "0x130000"
+        },
+        {
+          "name": "app1",
+          "type": 0,
+          "subtype": 17,
+          "offset": "0x140000",
+          "size": "0x140000"
+        },
+        {
+          "name": "storage",
+          "type": 1,
+          "subtype": 129,
+          "offset": "0x280000",
+          "size": "0x100000"
+        },
+        {
+          "name": "tlog",
+          "type": 1,
+          "subtype": 64,
+          "offset": "0x380000",
+          "size": "0x80000"
+        }
+      ],
+      "file": "partitions.bin"
+    },
+    "usb_update": {
+      "file": "firmware.bin"
+    },
+    "full_load": {
+      "flash_mode": "dio",
+      "flash_freq": "80m",
+      "flash_size": "4MB",
+      "parts": [
+        {
+          "offset": "0x1000",
+          "file": "bootloader.bin"
+        },
+        {
+          "offset": "0x8000",
+          "file": "partitions.bin"
+        },
+        {
+          "offset": "0xe000",
+          "file": "boot_app0.bin"
+        },
+        {
+          "offset": "0x10000",
+          "file": "firmware.bin"
+        }
+      ],
+      "erase_if_other_table": [
+        {
+          "from": "0x9000",
+          "to": "0xe000"
+        },
+        {
+          "from": "0x280000",
+          "to": "0x380000"
+        },
+        {
+          "from": "0x380000",
+          "to": "0x400000"
+        }
+      ]
+    },
+    "stm32_links": [
+      "v1",
+      "v2"
+    ]
+  },
+  "label": "ESP32 Rx firmware",
+  "files": [
+    {
+      "path": "bootloader.bin",
+      "size": 13792,
+      "sha256": "34d00eaa9ea72a54d1319d8a91f3b6c3acccf9478e85ba4c75f97034749dc977"
+    },
+    {
+      "path": "partitions.bin",
+      "size": 3072,
+      "sha256": "7967e1d96d17d2490c5dd4f7f449d44bc02d0d72861b5b4ab84426b45681ec33"
+    },
+    {
+      "path": "firmware.bin",
+      "size": 1156672,
+      "sha256": "e19b1efb1535bb3380c4e18d1a2af9784e51ec4f9c7d5f647cf554152f7ce2c4"
+    },
+    {
+      "path": "boot_app0.bin",
+      "size": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    }
+  ]
+}

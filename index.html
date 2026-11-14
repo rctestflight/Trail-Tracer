@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trail Tracer Rx update</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#ffffff; --panel:#f6f8fa; --line:#d0d7de; --text:#1f2328; --dim:#656d76; --accent:#0969da; --accent-fg:#ffffff;
+  --good:#1a7f37; --warn:#9a6700; --bad:#cf222e; --bar:#e6eaef; --sel:#ddf4ff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3;
+  --dim:#8b949e; --accent:#2f81f7; --accent-fg:#ffffff; --good:#3fb950; --warn:#d29922; --bad:#f85149; --bar:#21262d; --sel:#12263f; } }
+:root[data-theme="dark"] { --bg:#0d1117; --panel:#161b22; --line:#30363d; --text:#e6edf3; --dim:#8b949e; --accent:#2f81f7;
+  --accent-fg:#ffffff; --good:#3fb950; --warn:#d29922; --bad:#f85149; --bar:#21262d; --sel:#12263f; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 "Roboto Mono", monospace; }
+header { display:flex; align-items:baseline; gap:12px; padding:14px 16px; border-bottom:1px solid var(--line); white-space:nowrap; overflow:hidden; }
+header b { font-size:16px; } header .note { margin-left:auto; } header a { color:var(--accent); }
+main { max-width:760px; margin:0 auto; padding:16px; }
+.note, .dim { color:var(--dim); }
+.card { border:1px solid var(--line); border-radius:8px; background:var(--panel); padding:12px 14px; margin:0 0 12px; position:relative; }
+.card h2 { margin:0 0 4px; font-size:12px; font-weight:500; color:var(--dim); text-transform:uppercase; letter-spacing:.06em; }
+.line { height:22px; line-height:22px; white-space:nowrap; overflow:hidden; }
+.big { font-size:16px; font-weight:600; } .line.big { height:24px; line-height:24px; }
+.card .act { position:absolute; right:14px; top:10px; }
+a, .link { color:var(--accent); text-decoration:none; cursor:pointer; background:none; border:0; padding:0; font:inherit; }
+.link:disabled { color:var(--dim); cursor:default; }
+.rx { display:grid; grid-template-columns:200px minmax(0, 1fr); gap:14px; }
+.photo { position:relative; width:200px; height:176px; }
+.photo img, .photo svg { position:absolute; inset:0; width:200px; height:176px; border-radius:6px; }
+.photo img { background:#fff; }
+.rxlist { border:1px solid var(--line); border-radius:6px; background:var(--bg); height:120px; overflow-y:auto; margin:2px 0 0; outline:none; padding:2px 0; }
+.rxlist .line { padding:0 8px; } .rxlist .line.big { margin-top:4px; } .rxlist #rxBtn { margin:8px 8px 0; }
+button.find { width:100%; height:72px; font-size:20px; font-weight:600; background:var(--accent); border-color:var(--accent); color:var(--accent-fg); }
+.rxlist:focus-visible { border-color:var(--accent); box-shadow:0 0 0 2px var(--sel); }
+.rxlist div { height:28px; padding:3px 8px; white-space:nowrap; overflow:hidden; display:flex; gap:8px; cursor:pointer; }
+.rxlist div.on { background:var(--sel); } .rxlist .r { width:2ch; color:var(--accent); }
+.rxbtns { display:flex; align-items:center; gap:14px; height:36px; }
+.instr { border-left:4px solid var(--accent); background:var(--panel); border-radius:6px; padding:12px 14px; margin:0 0 12px; height:76px; font-size:15px; overflow:hidden; }
+.instr.good { border-color:var(--good); } .instr.bad { border-color:var(--bad); } .instr.warn { border-color:var(--warn); }
+.row { display:flex; align-items:center; gap:14px; height:44px; margin-bottom:12px; }
+button { font:inherit; border-radius:6px; border:1px solid var(--line); background:var(--bg); color:var(--text); padding:6px 16px; cursor:pointer; width:140px; }
+button.primary { background:var(--accent); border-color:var(--accent); color:var(--accent-fg); font-weight:600; width:220px; padding:8px 18px; }
+button:disabled { opacity:.45; cursor:default; }
+.bar { flex:1; height:10px; background:var(--bar); border-radius:5px; overflow:hidden; }
+.bar > div { height:100%; background:var(--accent); transition:width .3s; }
+.pct { width:24ch; white-space:nowrap; overflow:hidden; font-variant-numeric:tabular-nums; }
+ol.steps { list-style:none; padding:0; margin:0; }
+ol.steps li { height:24px; display:flex; gap:10px; white-space:nowrap; overflow:hidden; }
+ol.steps li .m { width:2ch; text-align:center; flex:none; }
+.now { font-weight:600; } .done { color:var(--good); } .fail { color:var(--bad); } .wait, .skip { color:var(--dim); }
+.wipe { color:var(--warn); font-weight:600; height:22px; margin:0 0 12px; white-space:nowrap; overflow:hidden; }
+details.more { border-top:1px solid var(--line); padding:8px 0; }
+summary { cursor:pointer; color:var(--dim); }
+.kv { display:grid; grid-template-columns:18ch 1fr; gap:2px 12px; margin:8px 0; }
+.kv .k { color:var(--dim); }
+pre { margin:8px 0 0; height:180px; overflow:auto; background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:8px; font:12px/1.4 "Roboto Mono", monospace; white-space:pre-wrap; }
+.reflist { position:absolute; left:0; right:0; top:100%; margin-top:4px; z-index:3; background:var(--bg); border:1px solid var(--line); border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,.18); padding:6px; max-height:70vh; overflow:auto; }
+.rgroup { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; margin:8px 6px 2px; }
+.refopt { display:grid; gap:0; width:100%; text-align:left; border:1px solid var(--line); border-radius:6px; padding:6px 10px; margin:4px 0; background:var(--bg); }
+.refopt.on { border-color:var(--accent); } .refopt .dim { font-size:12px; }
+.refopt { grid-template-columns:minmax(0, 1fr) auto; column-gap:16px; } .refopt b, .refopt .dim { grid-column:1; }
+.refopt .gitref { grid-column:2; grid-row:1 / span 2; align-self:center; text-align:right; white-space:nowrap; }
+.gitref { font-size:14px; font-weight:600; }
+.devrefs { padding:4px 6px; } .devrefs > summary { padding:4px 0; }
+footer { max-width:760px; margin:0 auto; padding:0 16px 24px; }
+@media (max-width: 600px) { body { font-size:12px; } .big { font-size:14px; } .instr { height:96px; font-size:13px; } header .note { display:none; }
+  .rx { grid-template-columns:120px minmax(0, 1fr); gap:8px; } .photo, .photo img, .photo svg { width:120px; height:106px; } .rxlist div { padding:3px 6px; gap:6px; }
+  button.primary { width:150px; } button { width:110px; } .kv { grid-template-columns:15ch 1fr; } }
+.step.off { opacity:.4; pointer-events:none; }
+/* V1 factory install (?factory): the steps and one button; no firmware choice */
+.fonly { display:none; }
+body.factory .fonly { display:block; }
+body.factory #fwCard, body.factory #doneBtn, body.factory #s2, body.factory #updBtn, body.factory #rxBtn2, body.factory #refLink,
+body.factory #eraseBtn, body.factory .nofactory, body.factory #s1, body.factory #s4, body.factory header, body.factory footer { display:none !important; }
+.fphoto { margin:10px 0 4px; }
+.fgood { margin-top:8px; padding:10px 12px; border:1px solid var(--good); border-left-width:4px; border-radius:6px; color:var(--good);
+  background:color-mix(in srgb, var(--good) 10%, var(--bg)); font-weight:600; }
+.fwarn { margin:0 0 12px; padding:10px 12px; border:1px solid var(--warn); border-left-width:4px; border-radius:6px; color:var(--warn); }
+#cfgCard h2 { text-transform:none; letter-spacing:0; font-size:14px; font-weight:600; color:var(--text); }
+/* factory stepper: the vertical stepper of setup wizards (Material Design): numbered circle, done = check, one line */
+ol.fsteps { list-style:none; margin:0; padding:0; }
+li.fs { display:flex; gap:14px; position:relative; padding:0 0 18px; }
+li.fs:not(:last-child)::before { content:''; position:absolute; left:15px; top:34px; bottom:2px; width:2px; background:var(--line); }
+li.fs .num { flex:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-weight:600; background:var(--bar); color:var(--dim); }
+li.fs.cur .num { background:var(--accent); color:var(--accent-fg); }
+li.fs.done .num { background:var(--good); color:#fff; }
+li.fs .fb { flex:1; min-width:0; padding-top:5px; }
+li.fs .ft { font-weight:600; line-height:22px; }
+li.fs.later .ft { color:var(--dim); font-weight:400; }
+li.fs .fr { color:var(--dim); font-weight:400; margin-left:12px; }
+li.fs.cur p { margin:6px 0 0; }
+li.fs.cur button.primary { margin-top:12px; width:auto; min-width:220px; height:44px; }
+.fbar { margin-top:12px; height:8px; background:var(--bar); border-radius:4px; overflow:hidden; }
+.fbar > div { height:100%; background:var(--accent); transition:width .3s; }
+.fbar.ind > div { width:30% !important; animation:fslide 1.2s linear infinite; }
+@keyframes fslide { from { transform:translateX(-100%); } to { transform:translateX(340%); } }
+.fpct { height:20px; font-size:12px; color:var(--dim); font-variant-numeric:tabular-nums; }
+.falert { margin-top:12px; padding:10px 12px; border:1px solid var(--bad); border-left-width:4px; border-radius:6px;
+  color:var(--bad); background:color-mix(in srgb, var(--bad) 8%, var(--bg)); }
+#freset { margin:4px 0 0 46px; font-size:12px; }
+/* V1 settings editor */
+/* editor box: line numbers left, the whole default file (45 lines and the empty last line, 19 px each) with no scroll, a bottom-edge resize */
+#cfgCard.off { display:none !important; }
+.cfged { display:flex; height:calc(46 * 19px + 16px + 2px); min-height:80px; resize:vertical; overflow:hidden;
+  border:1px solid var(--line); border-radius:6px; background:var(--bg); margin:8px 0; }
+.cfggut { flex:none; min-width:4ch; padding:8px 8px 40px 6px; text-align:right; color:var(--dim); opacity:.55;
+  font:13px/19px "Roboto Mono", monospace; white-space:pre; overflow:hidden; user-select:none; border-right:1px solid var(--line); }
+.cfgwrap { position:relative; flex:1; min-width:0; overflow:hidden; }
+#cfgText { position:absolute; inset:0; width:100%; height:100%; resize:none; border:0; margin:0; padding:8px; outline:none;
+  font:13px/19px "Roboto Mono", monospace; color:var(--text); background:transparent; white-space:pre; overflow:auto; tab-size:2; }
+.cfghi { position:absolute; left:0; right:0; height:19px; background:color-mix(in srgb, var(--bad) 13%, transparent); pointer-events:none; }
+.cfgcheck { height:72px; overflow-y:auto; font-size:13px; }
+.cfgcheck .ce { color:var(--bad); } .cfgcheck .cw { color:var(--warn); } .cfgcheck .cg { color:var(--good); }
+.cfgrow { display:flex; align-items:center; gap:16px; margin-top:8px; min-height:44px; flex-wrap:wrap; }
+
+.rxbox { border:1px solid var(--line); border-radius:6px; background:var(--bg); height:128px; padding:6px 0; }
+.rxbox .line { padding:0 12px; } .rxbox #rxBtn { margin:6px 12px 0; }
+.s1r { display:flex; flex-direction:column; justify-content:space-between; }
+.say { font-size:16px; font-weight:600; line-height:24px; height:48px; overflow:hidden; }
+.instr { height:52px; }
+.latest { margin-left:8px; font-size:11px; font-weight:600; color:var(--accent-fg); background:var(--good); border-radius:4px; padding:0 6px; }
+.cols { display:grid; grid-template-columns:minmax(0, 1fr) 220px; gap:14px; align-items:start; }
+.cols.rx { grid-template-columns:200px minmax(0, 1fr) 220px; }
+.btns { display:flex; flex-direction:column; gap:10px; }
+.btns button, .btns .step { width:220px; }
+.btns button { height:44px; padding:0 12px; }
+.mid { min-width:0; }
+#s1 .btns { align-self:end; } #fwCard .btns { align-self:center; } #s4 .btns { align-self:start; }
+#rxDetail { margin-top:10px; height:70px; } #rxDetail .line { padding:0; white-space:pre; }
+.prog { display:flex; flex-direction:column; justify-content:center; gap:6px; height:44px; }
+.prow { display:flex; align-items:center; gap:10px; height:19px; } .prow.skip { opacity:.4; }
+.plab { flex:none; width:9ch; white-space:pre; font-size:13px; }
+.prow.fail .bar > div { background:var(--bad); }
+.pct { width:16ch; white-space:nowrap; overflow:hidden; } .pctn { width:5ch; white-space:pre; text-align:right; font-variant-numeric:tabular-nums; }
+.cols .instr { margin:8px 0 6px; } .cols .wipe { margin:0; }
+#s4.ok { border:2px solid var(--good); background:color-mix(in srgb, var(--good) 14%, var(--panel)); }
+#s4.ok .bar > div { background:var(--good); }
+#s4.ok .instr { border-color:var(--good); background:transparent; color:var(--good); font-size:18px; font-weight:700; padding:6px 14px; line-height:40px; white-space:nowrap; }
+#s4.ok .wipe { visibility:hidden; }
+.spin { display:inline-block; width:16px; height:16px; box-sizing:border-box; border:2px solid var(--line); border-top-color:var(--accent); border-radius:50%; vertical-align:middle; opacity:0; animation:spin .8s linear infinite, spinIn 0s linear .5s forwards; }
+.spin[hidden] { display:none; }
+@keyframes spin { to { transform:rotate(360deg); } } @keyframes spinIn { to { opacity:1; } }
+.slot { flex:none; width:16px; height:16px; display:inline-flex; }
+.btns .spin { align-self:center; width:24px; height:24px; margin-top:10px; }
+#rxDetail .spin { margin-left:8px; }
+#s1say.nousb { height:auto; }
+/* phone: one column, the buttons full width under the text (the firmware list is read on a phone; no USB there) */
+@media (max-width: 600px) { .cols { grid-template-columns:minmax(0, 1fr); gap:10px; }
+  .cols.rx { grid-template-columns:120px minmax(0, 1fr); } .cols.rx .btns { grid-column:1 / -1; }
+  .btns button, .btns .step { width:100%; } .say { font-size:14px; line-height:20px; height:40px; } }
+</style>
+</head>
+<body>
+<header><b>Trail Tracer</b><span class="nofactory">Rx update</span><span class="fonly">V1 factory firmware</span><span class="note">Chrome or Edge on a computer</span></header>
+<main>
+  <div id="fsteps" class="card fonly"></div>
+  <div id="cfgCard" class="card fonly"><h2>Settings (optional)</h2>
+    <p>To change settings, edit them here and save them to the Rx board after step 4. The box starts with the factory settings. You can also paste in your own settings file.</p>
+    <p>Press Save to Rx board. In the save window, open the Rx board's USB drive and save as config.json. Replace the old file.</p>
+    <div id="cfgEd" class="cfged"><div id="cfgGut" class="cfggut"></div><div class="cfgwrap"><div id="cfgHi" class="cfghi" hidden></div><textarea id="cfgText" spellcheck="false" autocomplete="off" wrap="off"></textarea></div></div>
+    <div id="cfgCheck" class="cfgcheck"></div>
+    <div class="cfgrow"><button id="cfgSave" class="primary">Save to Rx board</button><button id="cfgReset" class="link" style="width:auto">Reset to factory settings</button></div></div>
+  <div id="s1" class="card rx cols step"><div class="photo"><img src="receiver.jpg" alt="Trail Tracer Rx board">
+    <svg id="arrows" viewBox="0 0 320 282" hidden>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#e5322d"/></marker></defs>
+      <g stroke="#fff" stroke-width="12" stroke-linecap="round"><path d="M268 48L176 99"/><path d="M48 236L58 160"/></g>
+      <g stroke="#e5322d" stroke-width="6" stroke-linecap="round" marker-end="url(#ah)"><path d="M268 48L176 99"/><path d="M48 236L58 160"/></g>
+      <g font-family="Roboto Mono, monospace" font-weight="700" font-size="30" stroke="#fff" stroke-width="6" paint-order="stroke" fill="#e5322d">
+        <text x="196" y="36">1 Hold</text><text x="14" y="270">2 USB</text></g></svg></div>
+    <div class="mid"><div id="s1say" class="say">Hold the button while you plug in USB</div><div id="rxDetail"></div></div>
+    <div class="btns"><button id="doneBtn" class="primary">Done</button>
+      <div id="s2" class="step"><button id="findBtn" class="primary">Find Rx Boards</button><button id="rxBtn" class="primary" hidden>Disconnect</button></div></div></div>
+  <div id="fwCard" class="card cols step"><div class="mid"><div id="fwL1" class="line big"></div><div id="fwL2" class="line dim"></div><div id="fwL3" class="line gitref"></div></div>
+    <div class="btns"><button id="refBtn" class="primary">Choose</button><span id="spinFw" class="spin" hidden></span></div>
+    <div id="refList" class="reflist" hidden></div></div>
+  <div id="s4" class="card cols step"><div class="mid"><div class="prog"><div id="rowEsp" class="prow"><span class="plab">ESP32</span><div class="bar"><div id="barEsp" style="width:0%"></div></div><span class="slot"><span id="spinEsp" class="spin" hidden></span></span><span id="pctEsp" class="pctn"></span></div>
+      <div id="rowStm" class="prow"><span class="plab">STM32</span><div class="bar"><div id="barStm" style="width:0%"></div></div><span class="slot"><span id="spinStm" class="spin" hidden></span></span><span id="pctStm" class="pctn"></span></div></div>
+    <div id="instr" class="instr"></div><div class="wipe nofactory">Wipes all user settings and calibration.</div><div class="wipe fonly">Puts back the original V1 firmware. Erases all settings.</div></div>
+    <div class="btns"><button id="factBtn" class="primary fonly">Install</button><button id="updBtn" class="primary" disabled>Update</button><button id="rxBtn2" class="primary" hidden>Disconnect</button></div></div>
+  <details id="more" class="more"><summary>Details</summary>
+    <div id="dKv" class="kv"></div>
+    <div><a id="refLink" href="#" title="Copy this link to share exactly this firmware version">Link to this exact version</a> ·
+      <button id="eraseBtn" class="link" style="width:auto">Erase the ESP32 only</button></div>
+    <pre id="dLog"></pre><pre id="dUsb"></pre></details>
+</main>
+<footer id="pageVer" class="note"></footer>
+<script src="program.js"></script>
+</body>
+</html>

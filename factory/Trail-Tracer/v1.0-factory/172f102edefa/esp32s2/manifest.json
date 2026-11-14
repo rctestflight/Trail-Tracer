@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "product": "trail-tracer-rx",
+  "chip": "esp32s2",
+  "boards": [
+    "RX_REVA"
+  ],
+  "name": "ESP32 firmware (no version report)",
+  "version": "main 172f102",
+  "source": {
+    "repo": "rctestflight/Trail-Tracer",
+    "branch": "v1.0-factory",
+    "commit": "172f102edefa5454350fa76fffa3ff416d5b256e",
+    "subject": "",
+    "built_utc": "2026-10-12T23:19:27Z",
+    "builder": "local",
+    "site_branch": "main"
+  },
+  "esp32": {
+    "partition_table": {
+      "name": "main",
+      "crc32": "15c8b486",
+      "entries": [
+        {
+          "name": "nvs",
+          "type": 1,
+          "subtype": 2,
+          "offset": "0x9000",
+          "size": "0x5000"
+        },
+        {
+          "name": "phy_init",
+          "type": 1,
+          "subtype": 1,
+          "offset": "0xe000",
+          "size": "0x1000"
+        },
+        {
+          "name": "factory",
+          "type": 0,
+          "subtype": 0,
+          "offset": "0x10000",
+          "size": "0x270000"
+        },
+        {
+          "name": "storage",
+          "type": 1,
+          "subtype": 129,
+          "offset": "0x280000",
+          "size": "0x100000"
+        }
+      ],
+      "file": "partitions.bin"
+    },
+    "usb_update": null,
+    "full_load": {
+      "flash_mode": "dio",
+      "flash_freq": "80m",
+      "flash_size": "4MB",
+      "parts": [
+        {
+          "offset": "0x1000",
+          "file": "bootloader.bin"
+        },
+        {
+          "offset": "0x8000",
+          "file": "partitions.bin"
+        },
+        {
+          "offset": "0xe000",
+          "file": "boot_app0.bin"
+        },
+        {
+          "offset": "0x10000",
+          "file": "firmware.bin"
+        }
+      ],
+      "erase_if_other_table": [
+        {
+          "from": "0x9000",
+          "to": "0xe000"
+        },
+        {
+          "from": "0xe000",
+          "to": "0xf000"
+        },
+        {
+          "from": "0x280000",
+          "to": "0x380000"
+        }
+      ]
+    },
+    "stm32_links": [
+      "v1"
+    ]
+  },
+  "files": [
+    {
+      "path": "bootloader.bin",
+      "size": 13792,
+      "sha256": "34d00eaa9ea72a54d1319d8a91f3b6c3acccf9478e85ba4c75f97034749dc977"
+    },
+    {
+      "path": "partitions.bin",
+      "size": 3072,
+      "sha256": "c782e0314a1be3931e0c5fd7312fb9177eceb45961491aac8d63a7a62537f1fe"
+    },
+    {
+      "path": "firmware.bin",
+      "size": 817184,
+      "sha256": "b0935b41d0508d04cea358cc6f1dfa42197eaa546f85ec0f6c9e6dc838b5915f"
+    },
+    {
+      "path": "boot_app0.bin",
+      "size": 8192,
+      "sha256": "f94c5d786a7a8fab06ac5d10e33bf37711a6697636dc037559ea19cc410a17f0"
+    }
+  ]
+}
