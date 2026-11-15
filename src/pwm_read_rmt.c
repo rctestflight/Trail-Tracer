@@ -35,7 +35,7 @@ void pwm_read_rmt_init(uint8_t channelPins[], uint8_t numberOfPins)
 {
     assert(numberOfPins <= 8);
     pwm_in_num_channels = numberOfPins;
-    pwm_read_dur = (uint16_t *) malloc(numberOfPins * sizeof(uint16_t));
+    pwm_read_dur = (int32_t *) malloc(numberOfPins * sizeof(int32_t));
 
     for(int i = 0; i < pwm_in_num_channels; i++)
     {
